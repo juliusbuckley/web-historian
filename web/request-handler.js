@@ -4,14 +4,35 @@ var helpers = require('./http-helpers');
 var url = require('url');
 var fs = require('fs');
 
-var actions = {
-  'GET': function(request, response) {
 
-    // only do this when page loads  
-    fs.readFile(archive.paths.siteAssets + '/index.html', 'utf8', function(err, html) {
+var render = function (request, response, assets, route) {
+  fs.readFile(assets + route, 'utf8', function(err, html) { 
+    if (err) {
+      response.writeHead(404, helpers.headers);
+      response.end();
+    } else {
       response.writeHead(200, helpers.headers);
       response.end(html);
-    });
+    }
+  });
+};
+
+var routes = {
+  '/': '/index.html',
+  '/web/public/index.html': '/index.html',
+  '/web/public/loading.html': '/loading.html',
+  '/styles.css': '/styles.css'
+};
+
+var actions = {
+  'GET': function(request, response) {
+  
+    if (routes[request.url]) {
+      render(request, response, archive.paths.siteAssets, routes[request.url]);
+    } else {
+
+    }
+
 
   }, 
   'POST': function(request, response) {
@@ -26,10 +47,11 @@ var actions = {
   }
 };
 
-
 exports.handleRequest = function (req, res) {
 
-  console.log('req.url', req.url);
+  //console.log('req.url', req.url);
+  var parsedUrl = url.parse(req.url);
+  //console.log('hostname', parsedUrl);
 
   var action = actions[req.method];
   if (action) {
