@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
-
+var req = require('request');
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
  * Consider using the `paths` object below to store frequently used file paths. This way,
@@ -48,8 +48,10 @@ exports.isUrlInList = function(target, cb) {
 };
 
 exports.addUrlToList = function(target, cb) {
-  fs.appendFile(exports.paths.list, target, function(err) {});
-  cb();
+  fs.appendFile(exports.paths.list, target, function(err) {
+    cb();
+  });
+
 };
 
 exports.isUrlArchived = function(target, cb) {
@@ -63,6 +65,48 @@ exports.isUrlArchived = function(target, cb) {
   });
 };
 
-exports.downloadUrls = function() {
+exports.downloadUrls = function(urls) {
+  console.log('urls', urls);
+  _.each(urls, function(url) {
+    console.log('1 earl', url);
+    req(`http://${url}`, function (error, response, body) {
+      console.log('in req npm');
+      console.log('test', !error && response.statusCode === 200);
+      console.log('status code', response.statusCode);
+      if (!error && response.statusCode === 200) {
+        fs.createWriteStream(exports.paths.archivedSites + '/' + url, 'utf8', function() {
+          console.log('success!');
+        });
+      } else {
+        console.log('fail!');
+      }
+    });
+  });
 
+
+    // if (!error && response.statusCode === 200) {
+    //   fs.createWriteStream(exports.paths.archivedSites + '/www.' + url));
+    // }
+
+    // var test = exports.isUrlArchived(url, function(exists) { return exists; });
+    // console.log(test);
+
+    // if (!exports.isUrlArchived(url, function(exists) { return exists; })) {
+    //   req(`http://${url}`).pipe(fs.createWriteStream(exports.paths.archivedSites + '/' + url));
+    // } 
+
+
+
+  // fs.readFile(exports.paths.list, 'utf8', function(err, data) {
+  //   // var arr = data.split('\n');
+  //   urls.forEach(function(url) {
+  //     reqHTTP(`http://www.${url}`, function (error, response, body) {
+  //       console.log('here');
+  //       console.log(response.req);
+  //     });
+  //   });
+    //console.log('ARRR', arr);
+  // });
 };
+
+// .pipe(fs.createWriteStream(exports.paths.archivedSites + '/www.' + url));

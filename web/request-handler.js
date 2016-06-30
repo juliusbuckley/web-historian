@@ -4,7 +4,6 @@ var helpers = require('./http-helpers');
 var url = require('url');
 var fs = require('fs');
 
-
 var init = function (request, response, assets, route) {
   fs.readFile(assets + route, 'utf8', function(err, html) { 
     if (err) {
@@ -61,11 +60,11 @@ var actions = {
       data += chunk.toString();
     });
     request.on('end', function() {
-      //console.log('DATA', data.split('=')[1]);
-      var text = data.split('=')[1];
-      fs.appendFile(archive.paths.list, text, function(err) {});
-      response.writeHead(201, helpers.headers);
-      request.end();
+      var text = data.split('=')[1] + '\n';
+      archive.addUrlToList(text, function() {
+        response.writeHead(302, helpers.headers);
+        response.end();
+      });
     });
     
 
